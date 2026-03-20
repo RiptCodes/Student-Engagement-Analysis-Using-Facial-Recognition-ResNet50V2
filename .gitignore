@@ -1,0 +1,7 @@
+processed_data/
+projects/*.keras
+*.tfrecord
+*.h5
+__pycache__/
+*.pyc
+daisee-env/
