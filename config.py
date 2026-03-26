@@ -7,7 +7,7 @@ TEST_PATH   = f'{DATASET_PATH}/DataSet/Test' # path to test data
 LABELS_PATH = f'{DATASET_PATH}/Labels' # path to labels
 
 SAVE_DIR   = '/home/raysh/DAiSEE-PROJ/processed_data' # path to save processed data
-MODEL_PATH = '/home/raysh/DAiSEE-PROJ/projects/model_20260314_1941.keras' # path to a pre-trained model
+MODEL_PATH = '/home/raysh/DAiSEE-PROJ/projects/model_20260319_1747.keras' # path to a pre-trained model
 BEST_MODEL_PATH = '/home/raysh/DAiSEE-PROJ/projects/model_20260313_1941.keras' # path to save the best model (currently i have presaved this to 1941 model)
 
 IMG_SIZE   = (224, 224) # size of the input images

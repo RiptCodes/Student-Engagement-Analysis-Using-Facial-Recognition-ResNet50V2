@@ -48,3 +48,26 @@ print(tf.config.list_physical_devices('GPU'))
 ```
 source daisee-env/bin/activate
 ```
+
+## Setting up camera for the WSLinux
+
+##### 1. Open PowerShell As Administrator
+##### 2. Paste this:
+```
+usbipd list 
+```
+##### 3. Find your camera in the device list and take the list number "X.X"
+
+##### 4. Paste this: 
+```
+usbipd bind --busid X-X
+usbipd attach --wsl --busid X-X
+```
+##### 5. Device is now linked to WSL. Go back to command line and type (only if you receive errors):
+```
+sudo chmod 666 /dev/video0 /dev/video1
+```
+##### 6. Enter password for Ubuntu and then Run Demo.py. If you want to change the model access config.py and change `MODEL_PATH`
+```
+python3 demo.py
+```
