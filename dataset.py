@@ -63,12 +63,12 @@ def build_dataset(tfrecord_path, batch_size=BATCH, shuffle=True, augment=True):
 class DataGenerator:
     def __init__(self, tfrecord_path, labels, batch_size=BATCH):
         self.tfrecord_path = tfrecord_path
-        self.batch_size    = batch_size
+        self.batch_size = batch_size
 
         # count samples
         self.num_samples = sum(1 for _ in tf.data.TFRecordDataset(tfrecord_path))
         self.n_batches   = max(1, self.num_samples // batch_size)
-        print(f"  {self.num_samples} samples, {self.n_batches} batches")
+        print(f" {self.num_samples} samples, {self.n_batches} batches")
 
     def as_tf_dataset(self, shuffle=True):
         augment = shuffle  # only augment during training (augments are random affects basically)

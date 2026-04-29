@@ -13,13 +13,13 @@ from config import *
 
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
-    # let tf grow gpu memory as needed instead of reserving everything
+    # lets tf grow gpu memory as needed instead of reserving everything
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
 
 
 def load_models():
-    # load both models once at startup
+    # loads both models once at startup
     face_detector = YOLO('yolov8n-face-lindevs.pt')
     face_detector.to('cuda')
     engagement_model = tf.keras.models.load_model(MODEL_PATH)
@@ -27,20 +27,20 @@ def load_models():
 
 
 def get_face(frame, yolo_model):
-    # detect faces in the current frame
+    # detects faces in the current frame
     detection_result = yolo_model(frame, verbose=False, imgsz=320)[0]
     detected_boxes = detection_result.boxes
 
     if detected_boxes is None or len(detected_boxes) == 0:
         return None, None
 
-    # use the largest face (usually the main person in view)
+    # uses the largest face (usually the main person in view)
     face_areas = (detected_boxes.xyxy[:, 2] - detected_boxes.xyxy[:, 0]) * (detected_boxes.xyxy[:, 3] - detected_boxes.xyxy[:, 1])
     biggest_face_idx = int(face_areas.argmax())
     x1, y1, x2, y2 = map(int, detected_boxes.xyxy[biggest_face_idx].tolist())
 
     frame_height, frame_width = frame.shape[:2]
-    # add a little margin so the crop is less tight
+    # adds a 30% margin so the crop is less tight
     padding = int(0.3 * (x2 - x1))
     x1 = max(0, x1 - padding)
     y1 = max(0, y1 - padding)
@@ -57,12 +57,12 @@ def get_face(frame, yolo_model):
 
 
 def predict(face_image, classifier):
-    # preprocess the crop exactly like training
+    # preprocesses the crop exactly like training
     model_input = face_image.astype(np.float32)
     model_input = tf.keras.applications.resnet_v2.preprocess_input(model_input)
     model_input = np.expand_dims(model_input, axis=0)
 
-    # pick the top class and confidence from model output
+    # picks the top class and confidence from model output
     predictions = classifier(model_input, training=False).numpy()[0]
     top_class_idx = int(np.argmax(predictions))
 
@@ -129,7 +129,7 @@ class DetectionThread(threading.Thread):
         self.new_frame_event = threading.Event()
         self.running = True
 
-    # 
+    # runs the detection loop in the background
     def run(self):
         while self.running:
             # wait for a new frame from the main loop
@@ -142,12 +142,12 @@ class DetectionThread(threading.Thread):
             if frame_to_process is None:
                 continue
 
-            # run detection on a smaller copy to keep things fast
+            # runs detection on a smaller copy to keep things fast
             small_frame = cv2.resize(frame_to_process, (320, 240))
             face_crop, face_box = get_face(small_frame, self.face_detector)
 
             if face_crop is not None and face_box is not None:
-                # map box coords back to original resolution
+                # this maps box coords back to original resolution
                 scale_x = frame_to_process.shape[1] / 320
                 scale_y = frame_to_process.shape[0] / 240
                 x1, y1, x2, y2 = face_box
@@ -169,24 +169,23 @@ class DetectionThread(threading.Thread):
 
 
 def run():
-    # load models and keep yolo on gpu for faster inference
+    # loads models and keep yolo on gpu for faster inference
 
     face_detector, engagement_model = load_models()
-    # open webcam
-    cap = cv2.VideoCapture(0)
+    # opens webcam
+    cap = cv2.VideoCapture(0) # index may need to change depending on position of webcam in the input list (check readme)
     if not cap.isOpened():
         print("webcam not found")
         return
 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    cap.set(cv2.CAP_PROP_FPS, 30)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap.set(cv2.CAP_PROP_FPS, 60)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     
     detector_thread = DetectionThread(face_detector, engagement_model)
     detector_thread.start()
 
-    # make sure snapshot folder exists
     snapshot_dir = os.path.join('outputs', 'previews')
     os.makedirs(snapshot_dir, exist_ok=True)
 
@@ -198,7 +197,6 @@ def run():
     smoothed_fps = 0.0
     previous_tick = time.time()
 
-    # run detection every few frames so the preview stays smooth
     frame_count = 0
     while True:
         if not is_paused:
@@ -212,7 +210,7 @@ def run():
             frame = frozen_frame.copy()
 
         frame_count += 1
-        if (not is_paused) and (frame_count % 5 == 0):
+        if not is_paused:
             detector_thread.submit(frame)
 
         prediction = detector_thread.get_result()
@@ -228,7 +226,7 @@ def run():
             cv2.putText(frame, "no face detected", (20, 40),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (100, 100, 100), 2)
 
-        # lightly smooth fps so the number is easier to read
+        # smooth fps so the number is easier to read
         current_tick = time.time()
         frame_dt = max(1e-6, current_tick - previous_tick)
         instant_fps = 1.0 / frame_dt

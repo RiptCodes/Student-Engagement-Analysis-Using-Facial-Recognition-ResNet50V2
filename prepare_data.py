@@ -14,7 +14,7 @@ if __name__ == '__main__':
     preprocessor = FacePreprocessor()
 
     load_or_process(TRAIN_PATH, train_df, SAVE_DIR, 'train', preprocessor, preview=True)
-    load_or_process(VAL_PATH,   val_df,   SAVE_DIR, 'val',   preprocessor, preview=False)
-    load_or_process(TEST_PATH,  test_df,  SAVE_DIR, 'test',  preprocessor, preview=False)
+    load_or_process(VAL_PATH,val_df, SAVE_DIR, 'val',preprocessor, preview=False)
+    load_or_process(TEST_PATH, test_df,SAVE_DIR, 'test',preprocessor, preview=False)
 
     print(f"Done. Saved to {SAVE_DIR}")

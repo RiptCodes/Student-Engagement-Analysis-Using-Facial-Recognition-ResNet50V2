@@ -55,7 +55,7 @@ def show_preview(frames, frame_indices, label_text, clip_id):
     plt.tight_layout()
 
     out_path = f"outputs/previews/{label_text}.png"
-    counter = 1
+    counter =1
     while os.path.exists(out_path):
         out_path = f"outputs/previews/{label_text}_{counter}.png"
         counter += 1
@@ -106,7 +106,7 @@ class FacePreprocessor:
             return None
 
         # bounding box coords are created
-        areas = ((boxes.xyxy[:, 2] - boxes.xyxy[:, 0]) * 
+        areas = ((boxes.xyxy[:,2] - boxes.xyxy[:, 0]) * 
                  (boxes.xyxy[:, 3] - boxes.xyxy[:, 1]))
         best_index = int(areas.argmax())
         x1, y1, x2, y2 = map(int, boxes.xyxy[best_index].tolist())
@@ -139,7 +139,7 @@ class FacePreprocessor:
             areas = ((boxes.xyxy[:, 2] - boxes.xyxy[:, 0]) *
                      (boxes.xyxy[:, 3] - boxes.xyxy[:, 1]))
             best_index = int(areas.argmax())
-            x1, y1, x2, y2 = map(int, boxes.xyxy[best_index].tolist())
+            x1,y1, x2, y2 = map(int, boxes.xyxy[best_index].tolist())
             cv2.rectangle(output, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         return output
@@ -240,7 +240,7 @@ def process_split(video_dir, labels_df, out_dir, split_name, preprocessor,
         labels_df = pd.concat(parts).sample(frac=1).reset_index(drop=True) # shuffles dataset
 
     ######################
-    # checkpoint - save every 50 videos incase of crash (WSL crashes randomly)
+    # checkpoint -  every 50 videos saved incase of crash (WSL crashes randomly)
     processed_ids = set()
     failed_clips = []
     shown_labels = set()
