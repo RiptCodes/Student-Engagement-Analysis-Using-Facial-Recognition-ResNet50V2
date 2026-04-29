@@ -6,7 +6,7 @@ from config import *
 
 #model
 def build_model(freeze_base=True):
-    inp  = Input(shape=(224, 224, 3))
+    inp = Input(shape=(224, 224, 3))
     base = ResNet50V2(weights='imagenet', include_top=False, input_tensor=inp)
 
     base.trainable = not freeze_base

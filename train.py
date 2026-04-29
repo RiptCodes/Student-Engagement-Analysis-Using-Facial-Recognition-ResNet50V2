@@ -28,20 +28,19 @@ def train(train_gen, val_gen, weight_dict):
     os.makedirs(PROJECT_PATH, exist_ok=True)
     os.makedirs('outputs/plots', exist_ok=True)
 
-    version   = time.strftime('%Y%m%d_%H%M')
+    version= time.strftime('%Y%m%d_%H%M')
     save_path = os.path.join(PROJECT_PATH, f'model_{version}.keras')
 
     callbacks = [
-        tf.keras.callbacks.EarlyStopping(
-            monitor='val_accuracy', patience=PATIENCE,
+        tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=PATIENCE,
             restore_best_weights=True, verbose=1
         ),
         tf.keras.callbacks.ModelCheckpoint(
-            save_path, monitor='val_accuracy',
+        save_path, monitor='val_accuracy',
             save_best_only=True, verbose=1
         ),
         tf.keras.callbacks.ReduceLROnPlateau(
-            monitor='val_accuracy', factor=0.5,
+              monitor='val_accuracy', factor=0.5,
             patience=2, min_lr=1e-7, verbose=1
         )
     ]
@@ -51,7 +50,7 @@ def train(train_gen, val_gen, weight_dict):
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-3),loss='categorical_crossentropy',metrics=['accuracy'])
 
     train_ds = train_gen.as_tf_dataset(shuffle=True)
-    val_ds   = val_gen.as_tf_dataset(shuffle=False)
+    val_ds = val_gen.as_tf_dataset(shuffle=False)
 
     with tf.device('/GPU:0'):
         history1 = model.fit(
@@ -67,7 +66,7 @@ def train(train_gen, val_gen, weight_dict):
     model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss='categorical_crossentropy', metrics=['accuracy'])
 
     train_ds = train_gen.as_tf_dataset(shuffle=True)
-    val_ds   = val_gen.as_tf_dataset(shuffle=False)
+    val_ds= val_gen.as_tf_dataset(shuffle=False)
 
     history2 = model.fit(
         train_ds,
@@ -79,9 +78,9 @@ def train(train_gen, val_gen, weight_dict):
     )
 
     history = {
-        'loss':    history1.history['loss']        + history2.history['loss'],
-        'acc':     history1.history['accuracy']    + history2.history['accuracy'], 
-        'val_acc': history1.history['val_accuracy']+ history2.history['val_accuracy'], 'stage':   [1]*5 + [2]*len(history2.history['loss'])
+        'loss':history1.history['loss']+ history2.history['loss'],
+        'acc': history1.history['accuracy']+ history2.history['accuracy'], 
+        'val_acc': history1.history['val_accuracy']+ history2.history['val_accuracy'], 'stage':[1]*5 + [2]*len(history2.history['loss'])
     }
 
     print(f'\nModel saved to: {save_path}')
@@ -91,7 +90,7 @@ def train(train_gen, val_gen, weight_dict):
 def plot_training(history):
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
-    epochs     = range(1, len(history['loss']) + 1)
+    epochs= range(1, len(history['loss']) + 1)
     stage1_end = history['stage'].count(1)
 
     ax1.plot(epochs, history['loss'], label='Train Loss', color='steelblue')
@@ -101,8 +100,8 @@ def plot_training(history):
     ax1.set_ylabel('Loss')
     ax1.legend()
 
-    ax2.plot(epochs, history['acc'],     label='Train', color='green')
-    ax2.plot(epochs, history['val_acc'], label='Val',   color='red', linestyle='--')
+    ax2.plot(epochs, history['acc'],label='Train', color='green')
+    ax2.plot(epochs, history['val_acc'], label='Val',color='red', linestyle='--')
     ax2.axvline(x=stage1_end, color='gray', linestyle='--', label='Stage 1 → 2')
     ax2.set_title('Accuracy')
     ax2.set_xlabel('Epoch')
@@ -119,15 +118,15 @@ if __name__ == '__main__':
     from preprocessing import load_labels
     import numpy as np
 
-    train_df, val_df, _ = load_labels()
+    train_df, val_df, _ = load_labels() # only need train and val labels for training
 
     train_labels = train_df['Label'].values
-    val_labels   = val_df['Label'].values
+    val_labels = val_df['Label'].values
 
     train_gen = DataGenerator(f'{SAVE_DIR}/train.tfrecord', train_labels)
-    val_gen   = DataGenerator(f'{SAVE_DIR}/val.tfrecord',   val_labels)
+    val_gen = DataGenerator(f'{SAVE_DIR}/val.tfrecord', val_labels)
 
-    weights     = compute_class_weight('balanced', classes=np.unique(train_labels), y=train_labels)
+    weights= compute_class_weight('balanced', classes=np.unique(train_labels), y=train_labels)
     weight_dict = {i: float(w) for i, w in enumerate(weights)}
     print(f'Class weights: {weight_dict}')
 
