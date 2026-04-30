@@ -33,6 +33,7 @@ from config import *
 from dataset import DataGenerator
 from model import build_model, unfreeze_base_layers
 
+
 model, base = build_model(freeze_base=True)
 
 
@@ -137,9 +138,15 @@ if __name__ == '__main__':
     val_labels = val_df['Label'].values
 
     train_gen = DataGenerator(f'{SAVE_DIR}/train.tfrecord', train_labels)
-    val_gen = DataGenerator(f'{SAVE_DIR}/val.tfrecord', val_labels)
+    val_gen   = DataGenerator(f'{SAVE_DIR}/val.tfrecord', val_labels)
 
-    weights= compute_class_weight('balanced', classes=np.unique(train_labels), y=train_labels)
+    # weights computed from tfrecord because frame counts differ from video counts
+    print("Computing class weights from TFRecord...")
+    actual_labels = np.array([
+        int(tf.io.parse_single_example(ex, {'label': tf.io.FixedLenFeature([], tf.int64)})['label'].numpy())
+        for ex in tf.data.TFRecordDataset(f'{SAVE_DIR}/train.tfrecord')
+    ])
+    weights = compute_class_weight('balanced', classes=np.unique(actual_labels), y=actual_labels)
     weight_dict = {i: float(w) for i, w in enumerate(weights)}
     print(f'Class weights: {weight_dict}')
 
